@@ -1,0 +1,68 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dbzero-modelkit"
+version = "0.1.0"
+description = "Reusable dbzero-backed data model utilities"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [
+    {name = "Selltime", email = "dev@selltime.ai"}
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "dbzero>=0.3.0,<0.4",
+]
+
+[project.optional-dependencies]
+dev = [
+    "build>=1.0.0",
+    "pylint>=3.0",
+    "pytest>=7.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/selltime/dbzero-modelkit"
+Repository = "https://github.com/selltime/dbzero-modelkit"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["dbzero_modelkit*"]
+exclude = ["tests*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+
+[tool.pylint.messages_control]
+disable = [
+    "C0103",
+    "C0111",
+    "C0302",
+    "C1803",
+    "E1101",
+    "R0801",
+    "R0902",
+    "R0903",
+    "W0212",
+    "W0613",
+]
+ignored-modules = ["dbzero"]
+
+[tool.pylint.format]
+max-line-length = 100
+
+[tool.pylint.design]
+max-args = 7
+max-positional-arguments = 7

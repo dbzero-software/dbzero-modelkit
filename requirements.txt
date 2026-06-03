@@ -1,0 +1,2 @@
+# Runtime dependencies
+dbzero>=0.3.0
