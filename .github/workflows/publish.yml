@@ -54,11 +54,16 @@ jobs:
           bump = "${{ inputs.version_bump }}"
           path = Path("pyproject.toml")
           text = path.read_text(encoding="utf-8")
-          match = re.search(r'(?m)^version = "(\d+)\.(\d+)\.(\d+)"$', text)
+          match = re.search(r'(?m)^version = "([0-9]+(?:\.[0-9]+)*)"$', text)
           if not match:
-              raise SystemExit("pyproject.toml must contain a simple X.Y.Z project version")
+              raise SystemExit("pyproject.toml must contain a numeric project version")
 
-          major, minor, patch = map(int, match.groups())
+          old_version = match.group(1)
+          parts = [int(part) for part in old_version.split(".")]
+          if len(parts) < 3:
+              raise SystemExit("pyproject.toml version must include major, minor, and patch")
+
+          major, minor, patch = parts[:3]
           if bump == "major":
               major += 1
               minor = 0
@@ -71,7 +76,6 @@ jobs:
           else:
               raise SystemExit(f"Unsupported bump type: {bump}")
 
-          old_version = match.group(1)
           new_version = f"{major}.{minor}.{patch}"
           text = text[:match.start(1)] + new_version + text[match.end(1):]
           path.write_text(text, encoding="utf-8")
