@@ -1,22 +1,58 @@
 # dbzero-modelkit
 
-Reusable dbzero-backed model utilities copied from Selltime workspace projects.
+Reusable model primitives for projects that store Python objects with
+[dbzero](https://docs.dbzero.io/).
 
-This package currently contains standalone copies of common data-model helpers only. It does not yet replace implementations in `selltime`, `statek`, or `kangal`; integration into those projects is planned as separate follow-up work.
+`dbzero-modelkit` provides small, focused building blocks for common model patterns:
+sparse calendars, active-date windows, month-indexed storage, multilingual strings,
+FIFO queues, and tag-based object locks. The package is application-neutral and is
+intended to be imported by any Python project using dbzero.
+
+## Installation
+
+```bash
+pip install dbzero-modelkit
+```
+
+Requirements:
+
+- Python 3.9 or newer
+- dbzero>=0.3.0
 
 ## Included Models
 
-- `ActiveBase` and `ActiveIndex` for active-window objects.
-- `Calendar`, `MonthCalendar`, `get_month_index`, and `get_date_from_month_index` for sparse date calendars.
-- `LanguageCode` and `ML_String` for multilingual strings.
+- `ActiveBase` and `ActiveIndex` for objects that are active only within a date or datetime range.
+- `Calendar`, `MonthCalendar`, `get_month_index`, and `get_date_from_month_index` for sparse date-based values.
+- `LanguageCode` and `ML_String` for primary text values with optional translations.
 - `FiFoQueue` and `FQ_Item` for dbzero-backed FIFO queues.
-- `MonthStore` for sparse month-indexed object storage.
-- `ObjectLock` for tag-based object locking.
+- `MonthStore` for one-object-per-month storage with lazy item creation.
+- `ObjectLock` for temporary tag-based locking of dbzero objects.
 
-## Testing
+## Quick Start
 
-Run tests from this directory:
+Initialize dbzero before creating or loading dbzero-backed model objects:
 
-```bash
-python3 -m pytest -q
+```python
+from datetime import date
+
+import dbzero as db0
+
+from dbzero_modelkit import Calendar, FiFoQueue
+
+db0.init("./db0_data", read_write=True)
+db0.open("main", "rw")
+
+calendar = Calendar(base_year=2026)
+calendar.set(date(2026, 1, 1), "available")
+
+queue = FiFoQueue()
+queue.push_back(kind="email", recipient="user@example.test")
+
+assert calendar.get(date(2026, 1, 1)) == "available"
+assert queue.pop_front(1) == [
+    {"kind": "email", "recipient": "user@example.test"},
+]
+
+db0.close()
 ```
+
