@@ -7,12 +7,15 @@ from typing import Optional
 import dbzero as db0
 
 
-@db0.enum(values=["LEN", "LPL", "LGER", "LFR", "LESP"])
+@db0.enum(
+    values=["LEN", "LPL", "LGER", "LFR", "LESP"],
+    type_id="/dbzero/dbzero-modelkit/LanguageCode",
+)
 class LanguageCode:
     """Common language codes used by multi-language strings."""
 
 
-@db0.memo(no_default_tags=True)
+@db0.memo(id="/dbzero/dbzero-modelkit/ML_String", no_default_tags=True)
 class ML_String:
     """Store textual information in a primary language and optional translations."""
 

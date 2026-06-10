@@ -11,6 +11,60 @@ import pytest
 from dbzero_modelkit.calendars import Calendar, MonthCalendar, get_month_index
 
 
+def test_calendar_model_type_ids(db0_fixture):
+    calendar = Calendar()
+    month_calendar = MonthCalendar(calendar, 0)
+
+    assert db0.get_type_stats(type(calendar))["type_id"] == "/dbzero/dbzero-modelkit/Calendar"
+    assert (
+        db0.get_type_stats(type(month_calendar))["type_id"]
+        == "/dbzero/dbzero-modelkit/MonthCalendar"
+    )
+
+
+def test_calendar_prefix_propagates_to_created_month(db0_fixture):
+    db0.open("calendar_prefix", "rw")
+    calendar = Calendar(prefix="calendar_prefix")
+
+    month = calendar.get_month(date(2025, 1, 1), create=True)
+
+    assert db0.get_prefix_of(calendar).name == "calendar_prefix"
+    assert db0.get_prefix_of(month).name == "calendar_prefix"
+
+
+def test_calendar_default_prefix_propagates_to_created_month(db0_fixture):
+    calendar = Calendar()
+
+    month = calendar.get_month(date(2025, 1, 1), create=True)
+
+    assert db0.get_prefix_of(calendar).name == "test_prefix"
+    assert db0.get_prefix_of(month).name == "test_prefix"
+
+
+def test_calendar_child_prefix_survives_reopen(tmp_path):
+    db0_path = tmp_path / "db0"
+    db0.init(str(db0_path), read_write=True)
+    db0.open("default_prefix", "rw")
+    db0.open("calendar_prefix", "rw")
+    calendar = Calendar(prefix="calendar_prefix")
+    month = calendar.get_month(date(2025, 1, 1), create=True)
+    calendar_uuid = db0.uuid(calendar)
+    month_uuid = db0.uuid(month)
+    db0.commit()
+    db0.close()
+
+    db0.init(str(db0_path), read_write=True)
+    db0.open("default_prefix", "rw")
+    db0.open("calendar_prefix", "rw")
+    persisted_calendar = db0.fetch(calendar_uuid)
+    persisted_month = persisted_calendar.get_month(date(2025, 1, 1))
+
+    assert db0.uuid(persisted_month) == month_uuid
+    assert db0.get_prefix_of(persisted_calendar).name == "calendar_prefix"
+    assert db0.get_prefix_of(persisted_month).name == "calendar_prefix"
+    db0.close()
+
+
 class MockDate:
     """Date-like object used to test invalid day validation."""
 

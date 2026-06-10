@@ -5,7 +5,48 @@ from __future__ import annotations
 from datetime import date, datetime, timedelta
 from unittest.mock import patch
 
+import dbzero as db0
+
 from dbzero_modelkit.active import ActiveBase, ActiveIndex
+
+
+def test_active_model_type_ids(db0_fixture):
+    active_base = ActiveBase()
+    active_index = ActiveIndex()
+
+    assert (
+        db0.get_type_stats(type(active_base))["type_id"]
+        == "/dbzero/dbzero-modelkit/ActiveBase"
+    )
+    assert (
+        db0.get_type_stats(type(active_index))["type_id"]
+        == "/dbzero/dbzero-modelkit/ActiveIndex"
+    )
+
+
+def test_active_models_accept_keyword_only_prefix(db0_fixture):
+    db0.open("alternate_prefix", "rw")
+
+    active_base = ActiveBase(prefix="alternate_prefix")
+    active_index = ActiveIndex(prefix="alternate_prefix")
+
+    assert db0.get_prefix_of(active_base).name == "alternate_prefix"
+    assert db0.get_prefix_of(active_index).name == "alternate_prefix"
+    assert db0.get_prefix_of(active_index.active_from_index).name == "alternate_prefix"
+    assert db0.get_prefix_of(active_index.expires_on_index).name == "alternate_prefix"
+
+
+def test_active_base_subclass_without_prefix_remains_compatible(db0_fixture):
+    @db0.memo(no_default_tags=True)
+    class TimedThing(ActiveBase):
+        def __init__(self, name: str) -> None:
+            super().__init__()
+            self.name = name
+
+    thing = TimedThing("night shift")
+
+    assert thing.name == "night shift"
+    assert thing.active is True
 
 
 class DatetimeMock:

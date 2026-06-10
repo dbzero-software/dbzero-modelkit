@@ -10,11 +10,18 @@ import dbzero as db0
 from dbzero_modelkit.rpc_integration import rpc as db0_rpc
 
 
-@db0.memo(no_default_tags=True)
+@db0.memo(id="/dbzero/dbzero-modelkit/MonthStore", no_default_tags=True)
 class MonthStore:
     """General-purpose container for storing one object per month."""
 
-    def __init__(self, item_type: type, base_year: int = 2025) -> None:
+    def __init__(
+        self,
+        item_type: type,
+        base_year: int = 2025,
+        *,
+        prefix: str | None = None,
+    ) -> None:
+        db0.set_prefix(self, prefix)
         self.__item_type = item_type
         self.__base_year = base_year
         self.__months = []

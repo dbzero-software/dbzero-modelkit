@@ -10,6 +10,27 @@ import pytest
 from dbzero_modelkit.month_store import MonthStore
 
 
+def test_month_store_model_type_id(db0_fixture):
+    @db0.memo
+    class TestItem:
+        pass
+
+    month_store = MonthStore(TestItem)
+
+    assert db0.get_type_stats(type(month_store))["type_id"] == "/dbzero/dbzero-modelkit/MonthStore"
+
+
+def test_month_store_accepts_keyword_only_prefix(db0_fixture):
+    @db0.memo
+    class TestItem:
+        pass
+
+    db0.open("month_store_prefix", "rw")
+    month_store = MonthStore(TestItem, prefix="month_store_prefix")
+
+    assert db0.get_prefix_of(month_store).name == "month_store_prefix"
+
+
 def test_month_store_can_be_created(db0_fixture):
     @db0.memo
     class TestItem:
