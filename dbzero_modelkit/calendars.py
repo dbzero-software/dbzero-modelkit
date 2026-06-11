@@ -19,7 +19,7 @@ def get_date_from_month_index(base_year: int, month_index: int) -> Date:
     return Date(base_year + month_index // 12, month_index % 12 + 1, 1)
 
 
-@db0.memo(no_default_tags=True)
+@db0.memo(id="/dbzero/dbzero-modelkit/MonthCalendar", no_default_tags=True)
 class MonthCalendar:
     """Single sparse month view for Calendar."""
 
@@ -82,7 +82,7 @@ class MonthCalendar:
             actual_day += timedelta(days=1)
 
 
-@db0.memo(no_default_tags=True)
+@db0.memo(id="/dbzero/dbzero-modelkit/Calendar", no_default_tags=True)
 class Calendar:
     """Sparse date calendar with lazy month creation."""
 
@@ -101,7 +101,11 @@ class Calendar:
             else:
                 return None
         if self.__months[month_index] is None and create is True:
-            self.__months[month_index] = MonthCalendar(self, month_index)
+            self.__months[month_index] = MonthCalendar(
+                self,
+                month_index,
+                prefix=db0.get_prefix_of(self).name,
+            )
         return self.__months[month_index]
 
     def date_range(

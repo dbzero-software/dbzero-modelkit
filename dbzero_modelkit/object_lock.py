@@ -8,11 +8,18 @@ from typing import Any, Iterable, Type
 import dbzero as db0
 
 
-@db0.memo
+@db0.memo(id="/dbzero/dbzero-modelkit/ObjectLock")
 class ObjectLock:
     """General-purpose lock that holds references to locked objects."""
 
-    def __init__(self, locked_objects: Any | list[Any], duration: int = 300) -> None:
+    def __init__(
+        self,
+        locked_objects: Any | list[Any],
+        duration: int = 300,
+        *,
+        prefix: str | None = None,
+    ) -> None:
+        db0.set_prefix(self, prefix)
         if not isinstance(locked_objects, list):
             locked_objects = [locked_objects]
         self.locked_objects = locked_objects

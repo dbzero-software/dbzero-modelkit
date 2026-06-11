@@ -11,7 +11,7 @@ from dbzero_modelkit.rpc_integration import rpc as db0_rpc
 from dbzero_modelkit.time_utils import normalize_end, normalize_start
 
 
-@db0.memo(no_default_tags=True)
+@db0.memo(id="/dbzero/dbzero-modelkit/ActiveBase", no_default_tags=True)
 class ActiveBase:
     """Base object for models that are active only within a period of time."""
 
@@ -19,7 +19,10 @@ class ActiveBase:
         self,
         active_from: datetime | date | None = None,
         expires_on: datetime | date | None = None,
+        *,
+        prefix: str | None = None,
     ) -> None:
+        db0.set_prefix(self, prefix)
         self.active_from = active_from
         self.expires_on = expires_on
 
@@ -116,11 +119,12 @@ class ActiveBase:
         return merged_active_from, merged_expires_on
 
 
-@db0.memo(no_default_tags=True)
+@db0.memo(id="/dbzero/dbzero-modelkit/ActiveIndex", no_default_tags=True)
 class ActiveIndex:
     """Container indexing ActiveBase-compatible objects by active period."""
 
-    def __init__(self) -> None:
+    def __init__(self, *, prefix: str | None = None) -> None:
+        db0.set_prefix(self, prefix)
         self.__ix_active_from = db0.index()
         self.__ix_expires_on = db0.index()
 

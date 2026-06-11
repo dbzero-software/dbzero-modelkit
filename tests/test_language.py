@@ -2,9 +2,30 @@
 
 from __future__ import annotations
 
+import inspect
+
+import dbzero as db0
 import dbzero_modelkit
 
+import dbzero_modelkit.language as language_module
 from dbzero_modelkit.language import LanguageCode, ML_String
+
+
+def test_language_model_type_ids(db0_fixture):
+    text = ML_String("Dieta standardowa", LanguageCode.LPL)
+
+    assert db0.get_type_stats(type(text))["type_id"] == "/dbzero/dbzero-modelkit/ML_String"
+    # Future: Replace this with runtime enum metadata when dbzero exposes enum
+    # type_id introspection.
+    assert "type_id=\"/dbzero/dbzero-modelkit/LanguageCode\"" in inspect.getsource(language_module)
+
+
+def test_language_models_use_requested_prefix(db0_fixture):
+    db0.open("language_prefix", "rw")
+
+    text = ML_String("Dieta standardowa", LanguageCode.LPL, prefix="language_prefix")
+
+    assert db0.get_prefix_of(text).name == "language_prefix"
 
 
 def test_language_code_enum_values(db0_fixture):

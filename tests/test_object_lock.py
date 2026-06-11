@@ -10,6 +10,45 @@ import dbzero as db0
 from dbzero_modelkit.object_lock import ObjectLock
 
 
+def test_object_lock_model_type_id(db0_fixture):
+    @db0.memo
+    class TestObj:
+        pass
+
+    lock = ObjectLock(TestObj())
+
+    assert db0.get_type_stats(type(lock))["type_id"] == "/dbzero/dbzero-modelkit/ObjectLock"
+
+
+def test_object_lock_accepts_keyword_only_prefix(db0_fixture):
+    @db0.memo
+    class TestObj:
+        pass
+
+    db0.open("lock_prefix", "rw")
+    item = TestObj()
+    lock = ObjectLock(item, prefix="lock_prefix")
+
+    assert db0.get_prefix_of(lock).name == "lock_prefix"
+    assert db0.find(item, "LOCKED")
+
+
+def test_object_lock_can_tag_object_from_different_prefix(db0_fixture):
+    @db0.memo
+    class TestObj:
+        pass
+
+    db0.open("item_prefix", "rw")
+    item = TestObj()
+    db0.open("lock_prefix", "rw")
+
+    lock = ObjectLock(item, prefix="lock_prefix")
+
+    assert db0.get_prefix_of(item).name == "item_prefix"
+    assert db0.get_prefix_of(lock).name == "lock_prefix"
+    assert db0.find(item, "LOCKED", prefix="item_prefix")
+
+
 class DatetimeMock:
     """Deterministic datetime replacement for object lock tests."""
 

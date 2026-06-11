@@ -7,7 +7,7 @@ from typing import Callable, Dict, List, Optional
 import dbzero as db0
 
 
-@db0.memo
+@db0.memo(id="/dbzero/dbzero-modelkit/FQ_Item")
 class FQ_Item:  # pylint: disable=invalid-name
     """Single FIFO queue entry storing keyword arguments and its integer key."""
 
@@ -31,11 +31,12 @@ class FQ_Item:  # pylint: disable=invalid-name
         }
 
 
-@db0.memo
+@db0.memo(id="/dbzero/dbzero-modelkit/FiFoQueue")
 class FiFoQueue:
     """FIFO queue container backed by a dbzero index."""
 
-    def __init__(self) -> None:
+    def __init__(self, *, prefix: str | None = None) -> None:
+        db0.set_prefix(self, prefix)
         self.__items = db0.index()
         self.__next_key = 0
 

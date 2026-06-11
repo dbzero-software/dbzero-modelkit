@@ -4,7 +4,34 @@ from __future__ import annotations
 
 import dbzero as db0
 
-from dbzero_modelkit.queues import FiFoQueue
+from dbzero_modelkit.queues import FQ_Item, FiFoQueue
+
+
+def test_queue_model_type_ids(db0_fixture):
+    queue = FiFoQueue()
+    item = FQ_Item(0)
+
+    assert db0.get_type_stats(type(queue))["type_id"] == "/dbzero/dbzero-modelkit/FiFoQueue"
+    assert db0.get_type_stats(type(item))["type_id"] == "/dbzero/dbzero-modelkit/FQ_Item"
+
+
+def test_fifo_queue_accepts_keyword_only_prefix(db0_fixture):
+    db0.open("queue_prefix", "rw")
+
+    queue = FiFoQueue(prefix="queue_prefix")
+
+    assert db0.get_prefix_of(queue).name == "queue_prefix"
+    assert db0.get_prefix_of(queue._FiFoQueue__items).name == "queue_prefix"
+
+
+def test_fifo_queue_items_use_queue_prefix(db0_fixture):
+    db0.open("queue_prefix", "rw")
+    queue = FiFoQueue(prefix="queue_prefix")
+
+    queue.push_back(value=1)
+    item = next(iter(queue._FiFoQueue__items.select()))
+
+    assert db0.get_prefix_of(item).name == "queue_prefix"
 
 
 def test_fifo_queue_can_be_created(db0_fixture):
