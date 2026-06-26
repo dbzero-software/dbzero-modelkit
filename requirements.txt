@@ -1,2 +1,4 @@
 # Runtime dependencies
-dbzero>=0.3.0
+# Install one db backend explicitly:
+#   pip install "dbzero-modelkit[dbzero]"
+#   pip install "dbzero-modelkit[dbzero-pro]"
