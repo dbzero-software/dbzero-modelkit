@@ -17,7 +17,9 @@ pip install dbzero-modelkit
 Requirements:
 
 - Python 3.9 or newer
-- dbzero>=0.3.0
+- One db backend extra:
+  - `dbzero-modelkit[dbzero]` for `dbzero>=0.4.0`
+  - `dbzero-modelkit[dbzero-pro]` for `dbzero-pro>=0.3.3`
 
 ## Included Models
 
@@ -55,4 +57,3 @@ assert queue.pop_front(1) == [
 
 db0.close()
 ```
-
